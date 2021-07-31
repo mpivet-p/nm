@@ -1,0 +1,3 @@
+nm: /bin/znew: File format not recognized
+nm: /bin/ypdomainname: no symbols
+nm: Warning: '/dev/vcsu1' is not an ordinary file
