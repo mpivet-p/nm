@@ -19,7 +19,7 @@ SRC_PATH= srcs/
 OBJ_PATH= objs/
 
 INC_NAME= nm.h
-SRC_NAME= main.c check_file.c check_file_format.c
+SRC_NAME= main.c check_file.c fill_header.c#check_file_format.c 
 OBJ_NAME= $(SRC_NAME:.c=.o)
 
 INC= -I $(INC_PATH) -I libft/inc/

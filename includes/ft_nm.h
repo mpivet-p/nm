@@ -3,5 +3,6 @@
 
 size_t	check_file(int fd, const char *filepath);
 int		check_file_format(void *file_content);
+void	fill_header(void *file_content);
 
 #endif

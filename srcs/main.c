@@ -48,7 +48,7 @@ static int		get_file(const char *filepath)
 	{
 		perror("mmap");
 	}
-	check_file_format(file_content);
+	fill_header(file_content);
 	close(fd);
 	return (0);
 }
