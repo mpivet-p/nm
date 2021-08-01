@@ -21,7 +21,7 @@ static void	handle_file_type(struct stat *sb, const char *s)
 	}
 }
 
-size_t		check_file(int fd, const char *filepath)
+int			check_file(int fd, const char *filepath)
 {
 	struct stat	sb;
 	if (fstat(fd, &sb) < 0)
@@ -32,6 +32,7 @@ size_t		check_file(int fd, const char *filepath)
 	if (S_ISREG(sb.st_mode) != 1)
 	{
 		handle_file_type(&sb, filepath);
+		return (-1);
 	}
 	return (sb.st_size);
 }

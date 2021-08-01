@@ -30,7 +30,7 @@ void			handle_open_error(const char *s)
 
 static int		get_file(const char *filepath)
 {
-	size_t	file_size;
+	int		file_size;
 	void	*file_content;
 	int		fd;
 
@@ -48,7 +48,11 @@ static int		get_file(const char *filepath)
 	{
 		perror("mmap");
 	}
-	fill_header(file_content);
+	if (fill_header(file_content) != 0)
+	{
+		ft_putstr_fd("nm: ${FILE} : File format not recognized\n", STDERR_FILENO);
+		return (1);
+	}
 	close(fd);
 	return (0);
 }
