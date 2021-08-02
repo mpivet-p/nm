@@ -3,36 +3,43 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <elf.h>
 //TMP
 #include <stdio.h>
 
 void			handle_open_error(const char *s)
 {
-	ft_putstr_fd("ft_nm: ", STDERR_FILENO);
 	if (errno == ENOENT)
 	{
-		ft_putchar_fd('\'', STDERR_FILENO);
-		ft_putstr_fd(s, STDERR_FILENO);
-		ft_putstr_fd("': No such file\n", STDERR_FILENO);
+		print_error("ft_nm: ", "'", s, "': No such file\n");
 	}
 	else if (errno == EACCES)
 	{
-		ft_putstr_fd(s, STDERR_FILENO);
-		ft_putstr_fd(": Permission denied\n", STDERR_FILENO);
+		print_error("ft_nm: ", NULL, s, ": Permission denied\n");
 	}
 	else
 	{
-		ft_putstr_fd("Warning: '", STDERR_FILENO);
-		ft_putstr_fd(s, STDERR_FILENO);
-		ft_putstr_fd("': is not an ordinary file\n", STDERR_FILENO);
+		print_error("ft_nm: ", "Warning: '", s, "': is not an ordinary file\n");
 	}
 }
 
+/*
+**	=================================== MMAP CALL ===================================
+**	1) NULL			=> let the kernel choose the address to which create the mapping
+**	2) file_size	=> map size
+**	3) PROT_READ	=> memory protection of the mapping (Page may be read)
+**	4) MAP_PRIVATE	=> updates to the mapping ar invisible to other processes mapping the same region
+**	5) fd			=> file
+**	6) 0			=> offset
+**	=================================== --------- ===================================
+*/
+
 static int		get_file(const char *filepath)
 {
-	int		file_size;
-	void	*file_content;
-	int		fd;
+	int			file_size;
+	void		*file_content;
+	Elf64_Ehdr	header;
+	int			fd;
 
 	if ((fd = open(filepath, O_RDONLY)) < 0)
 	{
@@ -48,11 +55,12 @@ static int		get_file(const char *filepath)
 	{
 		perror("mmap");
 	}
-	if (fill_header(file_content) != 0)
+	if (fill_header(file_content, &header) != 0)
 	{
-		ft_putstr_fd("nm: ${FILE} : File format not recognized\n", STDERR_FILENO);
+		print_error("ft_nm: ", NULL, filepath, ": File format not recognized\n");
 		return (1);
 	}
+	get_section_headers(file_content, &header, file_size);
 	close(fd);
 	return (0);
 }

@@ -34,10 +34,9 @@ static int	check_header(Elf64_Ehdr *header)
 	return (0);
 }
 
-int			fill_header(void *file_content)
+int			fill_header(void *file_content, Elf64_Ehdr *header)
 {
 	unsigned char	e_ident[EI_NIDENT];
-	Elf64_Ehdr		header;
 
 	ft_memmove(&e_ident, file_content, EI_NIDENT);			// Copying e_ident array
 	if (e_ident[EI_MAG0] == ELFMAG0							// Checking file's magic number (0x07454c46)
@@ -47,13 +46,13 @@ int			fill_header(void *file_content)
 	{
 		if (e_ident[EI_CLASS] == ELFCLASS32)
 		{
-			get_32_bits_header(&header, file_content);
+			get_32_bits_header(header, file_content);
 		}
 		else if (e_ident[EI_CLASS] == ELFCLASS64)
 		{
-			ft_memmove(&header, file_content, sizeof(header));
+			ft_memmove(header, file_content, sizeof(Elf64_Ehdr));
 		}
-		return (check_header(&header));
+		return (check_header(header));
 	}
 	return (1);
 }
