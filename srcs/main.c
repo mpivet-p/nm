@@ -11,15 +11,15 @@ void			handle_open_error(const char *s)
 {
 	if (errno == ENOENT)
 	{
-		print_error("ft_nm: ", "'", s, "': No such file\n");
+		fprintf(stderr, "ft_nm: '%s': No such file\n", s);
 	}
 	else if (errno == EACCES)
 	{
-		print_error("ft_nm: ", NULL, s, ": Permission denied\n");
+		fprintf(stderr, "ft_nm: %s: Permission denied\n", s);
 	}
 	else
 	{
-		print_error("ft_nm: ", "Warning: '", s, "': is not an ordinary file\n");
+		fprintf(stderr, "ft_nm: Warning: '%s': is not an ordinary file\n", s);
 	}
 }
 
@@ -55,12 +55,13 @@ static int		get_file(const char *filepath)
 	{
 		perror("mmap");
 	}
+	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
 	if (fill_header(file_content, &header) != 0)
 	{
 		print_error("ft_nm: ", NULL, filepath, ": File format not recognized\n");
 		return (1);
 	}
-	get_section_headers(file_content, &header, file_size);
+	get_section_headers(file_content, &header);
 	close(fd);
 	return (0);
 }
