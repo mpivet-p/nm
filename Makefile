@@ -18,7 +18,7 @@ INC_PATH= includes/
 SRC_PATH= srcs/
 OBJ_PATH= objs/
 
-INC_NAME= nm.h
+INC_NAME= ft_nm.h
 SRC_NAME= main.c check_file.c fill_header.c print_error.c get_section_headers.c\
 			protected_memmove.c get_symbols.c
 OBJ_NAME= $(SRC_NAME:.c=.o)
@@ -37,7 +37,7 @@ $(NAME): $(OBJ)
 	gcc $(CFLAGS) -o $(NAME) $(OBJ) $(INC) $(LIBS)
 
 $(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	mkdir $(OBJ_PATH) 2> /dev/null || true
+	@mkdir $(OBJ_PATH) 2> /dev/null || true
 	$(CC) $(CFLAGS) $(INC) -o $@ -c $<
 
 clean:

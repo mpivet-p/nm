@@ -40,16 +40,16 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header)
 	{
 		return (1);
 	}
-	printf("There is %d program section headers\n", header->e_shnum);
+	//printf("There is %d program section headers\n", header->e_shnum);
 	for (int i = 0; i < header->e_shnum; i++)
 	{
 		if (fill_section_header(file_content, offset + (shift * i), &section_hdr, header) != 0)
 		{
 			return (1);
 		}
-		printf("[%.2d] ", i);
-		printf("%-20s", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name);
-		printf(" {%d}\n", section_hdr.sh_type);
+		//printf("[%.2d] ", i);
+		//printf("%-20s", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name);
+		//printf(" {%d}\n", section_hdr.sh_type);
 		if (section_hdr.sh_type == SHT_SYMTAB)
 			symtab = section_hdr;
 		if (section_hdr.sh_type == SHT_STRTAB
