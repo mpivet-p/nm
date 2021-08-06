@@ -1,6 +1,7 @@
 #ifndef FT_NM_H
 # define FT_NM_H
 
+#include "libft.h"
 #include <elf.h>
 #include <stddef.h>
 
@@ -11,5 +12,6 @@ void	print_error(const char *name, const char *opt_str, const char *filename, co
 int		get_section_headers(void *file_content, Elf64_Ehdr *header);
 int		protected_memmove(void *dst, const void* src, size_t len, void *max_addr);
 int		get_symbols(void *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symtab, Elf64_Ehdr *header);
+int		sort_list(t_list **head, void const *str);
 
 #endif

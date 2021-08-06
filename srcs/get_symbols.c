@@ -22,38 +22,39 @@ static int	fill_symbol(void *file_content, Elf64_Sym *symbol, int class)
 	return (0);
 }
 
-int		is_sorted(t_list *a, t_list *b, void const *offset)
+char	print_symbol_type(uint32_t symbol_type, uint32_t symbol_bind)
 {
-	size_t	i = 0, j = 0;
-	while (a->content->)
-}
+	static char symbol_list[16] = {'u', 'r', 'r', 't', 't', 'd', 'd', 'd', 'b', '2', '3', 't', '4', '5', 't', 't'}; 
+	char		symbol;
 
-t_list	*sort_symbols_list(t_list *to_sort, void const *offset)
-{
-	t_list *head = to_sort;
-	t_list *ptr;
-
-	to_sort = to_sort->next;
-	while (to_sort != NULL)
-	{
-		ptr = head;
-		if (is_sorted(
-	}
+	symbol = symbol_list[ELF64_ST_TYPE(symbol_type)];
+	if (ELF64_ST_BIND(symbol_bind) == STB_GLOBAL)
+		return (symbol - 32);
+	else if (ELF64_ST_BIND(symbol_bind) == STB_WEAK)
+		return ((ELF64_ST_TYPE(symbol_type) == 0) ? 'w' : 'W');
+	return (symbol);
 }
 
 void	print_symbols(t_list *symbols, void const *str)
 {
-	for (t_list *ptr = symbols; ptr != NULL; ptr = ptr->next)
+	Elf64_Sym *ptr;
+
+	for ( ; symbols != NULL; symbols = symbols->next)
 	{
-		if (((Elf64_Sym*)ptr->content)->st_value != 0)
-			printf("%016lx", ((Elf64_Sym*)ptr->content)->st_value);
+		ptr = symbols->content;
+		if (ptr->st_value != 0)
+			printf("%016lx", ptr->st_value);
 		else
 			printf("%*c", 16, ' ');
-		printf(" %s\n", (char*)(str + ((Elf64_Sym*)ptr->content)->st_name));
+		//printf(" %c", print_symbol_type(ptr->st_shndx, ptr->st_info));
+		printf(" %-3d %-2d %-2d", ptr->st_shndx
+									, ELF64_ST_BIND(ptr->st_info), ELF64_ST_TYPE(ptr->st_info));
+		printf(" %s\n", (char*)(str + ptr->st_name));
 	}
 }
 
-int		get_symbols(void *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symtab, Elf64_Ehdr *header)
+int		get_symbols(void *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *strtab
+											, Elf64_Shdr *symtab, Elf64_Ehdr *header)
 {
 	Elf64_Sym	symbol;
 	size_t		offset = symtab->sh_offset;
@@ -66,21 +67,13 @@ int		get_symbols(void *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symtab, Elf
 	{
 		if (fill_symbol(file_content + offset, &symbol, header->e_ident[EI_CLASS]))
 			return (1);
-		(void)str;
 		if (symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE && ft_strlen(str + symbol.st_name) != 0)
 		{
-			ft_lstappend(&lst, &symbol, sizeof(Elf64_Sym));
-			////printf("%-8x ", symbol.st_shndx);
-			//if (symbol.st_value != 0)
-			//	printf("%016lx", symbol.st_value);
-			//else
-			//	//printf("                 ");
-			//	printf("%*c", 16, ' ');
-			//printf(" %s\n", (char*)(str + symbol.st_name));
+			ft_lstappend(&lst, &symbol, sizeof(symbol));
 		}
 		offset += sym_size;
 	}
-	lst = sort_symbols_list(lst);
-	print_symbols(lst, str);
+	sort_list(&lst, str);
+	print_symbols(lst, str, shstrtab);
 	return (0);
 }

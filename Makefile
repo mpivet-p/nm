@@ -20,7 +20,7 @@ OBJ_PATH= objs/
 
 INC_NAME= ft_nm.h
 SRC_NAME= main.c check_file.c fill_header.c print_error.c get_section_headers.c\
-			protected_memmove.c get_symbols.c
+			protected_memmove.c get_symbols.c sort_symbol_list.c
 OBJ_NAME= $(SRC_NAME:.c=.o)
 
 INC= -I $(INC_PATH) -I libft/inc/

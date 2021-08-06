@@ -47,15 +47,19 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header)
 		{
 			return (1);
 		}
-		//printf("[%.2d] ", i);
-		//printf("%-20s", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name);
-		//printf(" {%d}\n", section_hdr.sh_type);
+		printf("[%.2d] ", i);
+		printf("%-20s", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name);
+		printf(" {%d}\n", section_hdr.sh_type);
 		if (section_hdr.sh_type == SHT_SYMTAB)
 			symtab = section_hdr;
-		if (section_hdr.sh_type == SHT_STRTAB
-			&& ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".strtab") == 0)
-			strtab = section_hdr;
+		if (section_hdr.sh_type == SHT_STRTAB)
+		{
+			if (ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".strtab") == 0)
+				strtab = section_hdr;
+			if (ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".shstrtab") == 0)
+				shstrtab = section_hdr;
+		}
 	}
-	get_symbols(file_content, &strtab, &symtab, header);
+	get_symbols(file_content, &shstrtab, &strtab, &symtab, header);
 	return (0);
 }

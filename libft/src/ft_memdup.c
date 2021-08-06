@@ -14,16 +14,11 @@
 
 void	*ft_memdup(void const *content, size_t content_size)
 {
-	unsigned char	*str1;
-	unsigned char	*str2;
 	void			*new;
 
 	new = ft_memalloc(sizeof(void) * content_size);
 	if (!new)
 		return (NULL);
-	str1 = (unsigned char *)content;
-	str2 = (unsigned char *)new;
-	while (*str1)
-		*(str2++) = *(str1++);
+	ft_memmove(new, content, content_size);
 	return (new);
 }
