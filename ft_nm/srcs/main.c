@@ -53,16 +53,21 @@ static int		get_file(const char *filepath)
 	}
 	if ((file_content = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 	{
-		perror("mmap");
-	}
-	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
-	if (fill_header(file_content, &header) != 0)
-	{
-		print_error("ft_nm: ", NULL, filepath, ": File format not recognized\n");
+		close(fd);
 		return (1);
 	}
-	get_section_headers(file_content, &header);
+	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
 	close(fd);
+	if (fill_header(file_content, &header) != 0)
+	{
+		fprintf(stderr, "ft_nm: %s: File format not recognized\n", filepath);
+		munmap(file_content, file_size);
+		return (1);
+	}
+	memory((uint64_t)file_content, file_size, (uint64_t)header.e_ident[EI_CLASS], FTNM_SETUP);
+	get_header(&header);
+	get_section_headers(file_content, &header);
+	munmap(file_content, file_size);
 	return (0);
 }
 

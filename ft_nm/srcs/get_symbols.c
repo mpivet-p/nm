@@ -3,7 +3,7 @@
 #include <elf.h>
 #include <stdio.h>
 
-static int	fill_symbol(void *file_content, Elf64_Sym *symbol, int class)
+static int	fill_symbol(void const *file_content, Elf64_Sym *symbol, int class)
 {
 	Elf32_Sym tmp_symbol;
 
@@ -22,58 +22,54 @@ static int	fill_symbol(void *file_content, Elf64_Sym *symbol, int class)
 	return (0);
 }
 
-char	print_symbol_type(uint32_t symbol_type, uint32_t symbol_bind)
-{
-	static char symbol_list[16] = {'u', 'r', 'r', 't', 't', 'd', 'd', 'd', 'b', '2', '3', 't', '4', '5', 't', 't'}; 
-	char		symbol;
+//void	print_symbol_type(Elf64
 
-	symbol = symbol_list[ELF64_ST_TYPE(symbol_type)];
-	if (ELF64_ST_BIND(symbol_bind) == STB_GLOBAL)
-		return (symbol - 32);
-	else if (ELF64_ST_BIND(symbol_bind) == STB_WEAK)
-		return ((ELF64_ST_TYPE(symbol_type) == 0) ? 'w' : 'W');
-	return (symbol);
+char *get_section_name(void const *file_content, size_t str_offset, uint32_t sh_index)
+{
+	Elf64_Ehdr *hdr = get_header(NULL);
+
+	uint32_t name_offset = *(uint32_t*)(file_content + hdr->e_shoff + (hdr->e_shentsize * sh_index));
+
+	return ((char*)(file_content + str_offset + name_offset));
 }
 
-void	print_symbols(t_list *symbols, void const *str)
+void	print_symbols(void const *file_content, t_list *symbols, Elf64_Shdr *shstrtab, uint32_t sh_offset)
 {
-	Elf64_Sym *ptr;
+	Elf64_Sym	*ptr;
+	uint8_t		class_padding = 8 * (int)memory(0, 0, 0, FTNM_CLASS);
 
 	for ( ; symbols != NULL; symbols = symbols->next)
 	{
 		ptr = symbols->content;
 		if (ptr->st_value != 0)
-			printf("%016lx", ptr->st_value);
+			printf("%0*lx", class_padding, ptr->st_value);
 		else
-			printf("%*c", 16, ' ');
-		//printf(" %c", print_symbol_type(ptr->st_shndx, ptr->st_info));
-		printf(" %-3d %-2d %-2d", ptr->st_shndx
-									, ELF64_ST_BIND(ptr->st_info), ELF64_ST_TYPE(ptr->st_info));
-		printf(" %s\n", (char*)(str + ptr->st_name));
+			printf("%*c", class_padding, ' ');
+		printf(" %-16s", get_section_name(file_content, shstrtab->sh_offset, ptr->st_shndx));
+		printf(" %-2d" , ELF64_ST_BIND(ptr->st_info));
+		printf(" %s\n", (char*)(file_content + sh_offset + ptr->st_name));
 	}
 }
 
-int		get_symbols(void *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *strtab
-											, Elf64_Shdr *symtab, Elf64_Ehdr *header)
+int		get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *strtab, Elf64_Shdr *symtab)
 {
 	Elf64_Sym	symbol;
-	size_t		offset = symtab->sh_offset;
-	size_t		sym_size = (header->e_ident[EI_CLASS] == ELFCLASS64) ? sizeof(Elf64_Sym) : sizeof(Elf32_Sym);
-	size_t		symtab_length = symtab->sh_size / symtab->sh_entsize;
-	void		*str = file_content + strtab->sh_offset;
 	t_list		*lst = NULL;
+	size_t		symtab_length = symtab->sh_size / symtab->sh_entsize;
+	size_t		offset = symtab->sh_offset;
+	void		*str = (void*)file_content + strtab->sh_offset;
 
 	for (size_t i = 0; i < symtab_length; i++)
 	{
-		if (fill_symbol(file_content + offset, &symbol, header->e_ident[EI_CLASS]))
+		if (fill_symbol(file_content + offset, &symbol, get_header(NULL)->e_ident[EI_CLASS]))
 			return (1);
 		if (symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE && ft_strlen(str + symbol.st_name) != 0)
 		{
 			ft_lstappend(&lst, &symbol, sizeof(symbol));
 		}
-		offset += sym_size;
+		offset += symtab->sh_entsize;
 	}
 	sort_list(&lst, str);
-	print_symbols(lst, str, shstrtab);
+	print_symbols(file_content, lst, shstrtab, strtab->sh_offset);
 	return (0);
 }

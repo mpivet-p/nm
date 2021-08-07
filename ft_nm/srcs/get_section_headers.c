@@ -4,7 +4,8 @@
 #include <elf.h>
 
 
-static int	fill_section_header(void *file_content, size_t offset, Elf64_Shdr *section_hdr, Elf64_Ehdr *header)
+static int	fill_section_header(void const *file_content, size_t offset
+							, Elf64_Shdr *section_hdr, Elf64_Ehdr *header)
 {
 	Elf32_Shdr	tmp_hdr;
 
@@ -27,7 +28,7 @@ static int	fill_section_header(void *file_content, size_t offset, Elf64_Shdr *se
 	return (0);
 }
 
-int			get_section_headers(void *file_content, Elf64_Ehdr *header)
+int			get_section_headers(void const *file_content, Elf64_Ehdr *header)
 {
 	size_t	offset = header->e_shoff;
 	size_t	shift = header->e_shentsize;
@@ -40,7 +41,6 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header)
 	{
 		return (1);
 	}
-	//printf("There is %d program section headers\n", header->e_shnum);
 	for (int i = 0; i < header->e_shnum; i++)
 	{
 		if (fill_section_header(file_content, offset + (shift * i), &section_hdr, header) != 0)
@@ -52,14 +52,12 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header)
 		printf(" {%d}\n", section_hdr.sh_type);
 		if (section_hdr.sh_type == SHT_SYMTAB)
 			symtab = section_hdr;
-		if (section_hdr.sh_type == SHT_STRTAB)
+		if (section_hdr.sh_type == SHT_STRTAB
+			&& ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".strtab") == 0)
 		{
-			if (ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".strtab") == 0)
-				strtab = section_hdr;
-			if (ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".shstrtab") == 0)
-				shstrtab = section_hdr;
+			strtab = section_hdr;
 		}
 	}
-	get_symbols(file_content, &shstrtab, &strtab, &symtab, header);
+	get_symbols(file_content, &shstrtab, &strtab, &symtab);
 	return (0);
 }

@@ -1,8 +1,8 @@
 #include "libft.h"
-#include <stdio.h>
 #include <elf.h>
+#include <stdio.h>
 
-static void	get_32_bits_header(Elf64_Ehdr *header, void *file_content)
+static void	get_32_bits_header(Elf64_Ehdr *header, void const *file_content)
 {
 	Elf32_Ehdr tmp_header;
 
@@ -34,7 +34,7 @@ static int	check_header(Elf64_Ehdr *header)
 	return (0);
 }
 
-int			fill_header(void *file_content, Elf64_Ehdr *header)
+int			fill_header(void const *file_content, Elf64_Ehdr *header)
 {
 	unsigned char	e_ident[EI_NIDENT];
 
