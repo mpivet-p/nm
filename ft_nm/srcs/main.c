@@ -36,39 +36,40 @@ void			handle_open_error(const char *s)
 
 static int		get_file(const char *filepath)
 {
-	int			file_size;
-	void		*file_content;
 	Elf64_Ehdr	header;
+	void		*file_content;
+	int			file_size;
+	int			ret;
 	int			fd;
 
+	ret = 0;
 	if ((fd = open(filepath, O_RDONLY)) < 0)
 	{
 		handle_open_error(filepath);
 		return (1);
 	}
-	if ((file_size = check_file(fd, filepath)) <= 0)
+	if ((file_size = check_file(fd, filepath)) <= 0
+		|| (file_content = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
 	{
 		close(fd);
 		return (1);
 	}
-	if ((file_content = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
-	{
-		close(fd);
-		return (1);
-	}
-	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
 	close(fd);
+	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
 	if (fill_header(file_content, &header) != 0)
 	{
 		fprintf(stderr, "ft_nm: %s: File format not recognized\n", filepath);
 		munmap(file_content, file_size);
 		return (1);
 	}
-	memory((uint64_t)file_content, file_size, (uint64_t)header.e_ident[EI_CLASS], FTNM_SETUP);
 	get_header(&header);
-	get_section_headers(file_content, &header);
+	if (get_section_headers(file_content, &header) != 0)
+	{
+		fprintf(stderr, "ft_nm: %s: no symbols\n", filepath);
+		ret = 1;
+	}
 	munmap(file_content, file_size);
-	return (0);
+	return (ret);
 }
 
 int				main(int argc, char **argv)
@@ -77,6 +78,8 @@ int				main(int argc, char **argv)
 
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
 	{
+		if (argc > 2)
+			printf("%s:\n", argv[i]);
 		if (get_file(argv[i]) != 0)
 			ret = 1;
 	}
