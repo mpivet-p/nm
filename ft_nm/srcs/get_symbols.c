@@ -124,9 +124,8 @@ void	delete_list(t_list *ptr)
 	while (ptr)
 	{
 		next = ptr->next;
-		//printf("%p %p\n", ptr, ptr->content);
 		free(ptr->content);
-		ft_memdel((void*)ptr);
+		free(ptr);
 		ptr = next;
 	}
 }
@@ -139,7 +138,6 @@ int		get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *str
 	size_t		offset = symtab->sh_offset;
 	void		*str = (void*)file_content + strtab->sh_offset;
 
-(void)shstrtab;
 	for (size_t i = 0; i < symtab_length; i++)
 	{
 		if (fill_symbol(file_content + offset, &symbol, get_header(NULL)->e_ident[EI_CLASS]))
@@ -150,8 +148,8 @@ int		get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *str
 		}
 		offset += symtab->sh_entsize;
 	}
-	//sort_list(&lst, str);
-	//print_symbols(file_content, lst, shstrtab, strtab->sh_offset);
+	sort_list(&lst, str);
+	print_symbols(file_content, lst, shstrtab, strtab->sh_offset);
 	delete_list(lst);
 	lst = NULL;
 	return (0);

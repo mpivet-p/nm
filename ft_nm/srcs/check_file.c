@@ -26,8 +26,7 @@ int			check_file(int fd, const char *filepath)
 	struct stat	sb;
 	if (fstat(fd, &sb) < 0)
 	{
-		perror("fstat");	// TMP
-		return (-1); // Handle error
+		return (-1);
 	}
 	if (S_ISREG(sb.st_mode) != 1)
 	{

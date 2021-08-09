@@ -34,27 +34,28 @@ void			handle_open_error(const char *s)
 **	=================================== --------- ===================================
 */
 
-static int		get_file(const char *filepath)
+static int		get_file(const char *filepath, void **file_content, int *file_size)
 {
-	Elf64_Ehdr	header;
-	void		*file_content;
-	int			file_size;
-	int			ret;
 	int			fd;
 
-	ret = 0;
 	if ((fd = open(filepath, O_RDONLY)) < 0)
 	{
 		handle_open_error(filepath);
 		return (1);
 	}
-	if ((file_size = check_file(fd, filepath)) <= 0
-		|| (file_content = mmap(NULL, file_size, PROT_READ, MAP_PRIVATE, fd, 0)) == MAP_FAILED)
+	if ((*file_size = check_file(fd, filepath)) > 0)
 	{
-		close(fd);
-		return (1);
+		*file_content = mmap(NULL, *file_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	}
 	close(fd);
+	return (*file_content == MAP_FAILED);
+}
+
+static int		do_nm(const char *filepath, void *file_content, int file_size, int argc)
+{
+	Elf64_Ehdr	header;
+	int			ret;
+
 	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
 	if (fill_header(file_content, &header) != 0)
 	{
@@ -62,6 +63,8 @@ static int		get_file(const char *filepath)
 		munmap(file_content, file_size);
 		return (1);
 	}
+	if (argc > 2)
+		printf("\n%s:\n", filepath);
 	get_header(&header);
 	if (get_section_headers(file_content, &header) != 0)
 	{
@@ -74,18 +77,20 @@ static int		get_file(const char *filepath)
 
 int				main(int argc, char **argv)
 {
-	int	ret = 0;
+	void	*file_content;
+	int		file_size;
+	int		ret = 0;
 
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
 	{
-		if (argc > 2)
-			printf("%s:\n", argv[i]);
-		if (get_file(argv[i]) != 0)
+		if (get_file(argv[i], &file_content, &file_size) != 0
+			|| do_nm(argv[i], file_content, file_size, argc) != 0)
 			ret = 1;
 	}
 	if (argc == 1)		// If we dont have args, we need to excute nm with "a.out"
 	{
-		if (get_file("a.out") != 0)
+		if (get_file("a.out", &file_content, &file_size) != 0
+			|| do_nm("a.out", file_content, file_size, 1) != 0)
 			ret = 1;
 	}
 	return (ret);
