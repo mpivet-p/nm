@@ -5,6 +5,8 @@
 #include <elf.h>
 #include <stddef.h>
 
+# define OTOOL_OPT_S 4
+
 int		check_file(int fd, const char *filepath);
 int		check_file_format(void *file_content);
 int		fill_header(void *file_content, Elf64_Ehdr *header);

@@ -68,10 +68,32 @@ static int		get_file(const char *filepath)
 	return (0);
 }
 
+int				parse_args(int argc, char **argv, char *section)
+{
+	static char	*options[] = {"-t", "-h", "-hcolor", "-s", "-l"};
+
+	if (argc == 1)
+		return (-1);
+	for (size_t i = 0; i < (size_t)argc; i++)
+	{
+		if (ft_strcmp(argv[1], options[i]) == 0)
+		{
+			if (i == OTOOL_OPT_S && argc >= 2)
+				ft_strncpy(section, argv[2], 32);
+			else if (i == OTOOL_OPT_S)
+				return (-1);
+			return (i);
+		}
+	}
+	return (-1);
+}
+
 int				main(int argc, char **argv)
 {
-	int	ret = 0;
+	char	section[32];
+	int		ret = 0;
 
+	printf("%d\n", parse_args(argc, argv, section));
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
 	{
 		if (get_file(argv[i]) != 0)
@@ -80,7 +102,11 @@ int				main(int argc, char **argv)
 	if (argc == 1)		// If we dont have args, we print usage
 	{
 		fprintf(stderr, "Usage: otool <object file> ...\n");
-		fprintf(stderr, "\t-t print the text section (by default)\n");
+		fprintf(stderr, "\t-t print the text section\n");
+		fprintf(stderr, "\t-h print the header\n");
+		fprintf(stderr, "\t-hcolor print the header with colors\n");
+		fprintf(stderr, "\t-s <section name> print a section by it's name\n");
+		fprintf(stderr, "\t-l print the list of sections\n");
 		ret = 1;
 	}
 	return (ret);
