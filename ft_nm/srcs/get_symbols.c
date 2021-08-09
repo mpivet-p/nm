@@ -26,8 +26,7 @@ static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 {
 	Elf64_Ehdr	*header = get_header(NULL);
 	Elf64_Shdr	shdr;
-	char		type;
-
+	char		type = 0;
 
 	fill_section_header(file_content, header->e_shoff + (header->e_shentsize * sh_shndx), &shdr, header);
 	if (shdr.sh_type == SHT_NOBITS && shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)) //.bss
@@ -49,17 +48,14 @@ static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 				type = 'T';
 		}
 	}
-	else if (shdr.sh_type == SHT_INIT_ARRAY && shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)) //.init_array
-		type = 'T';
-	else if (shdr.sh_type == SHT_FINI_ARRAY && shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)) //.fini_array
+	else if (shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)
+		&& (shdr.sh_type == SHT_INIT_ARRAY || shdr.sh_type == SHT_FINI_ARRAY)) //.init_array or .fini_array
 		type = 'T';
 	else if (shdr.sh_flags == (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)) //.fini_array
 		type = 'T';
 	else if (shdr.sh_type == SHT_DYNAMIC) //.dynamic
 		type = 'D';
-	else
-		type = '?';
-	return (type);
+	return (type ? type : 'N');
 }
 
 static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
@@ -68,7 +64,7 @@ static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
 
 	if (ELF64_ST_BIND(symbol->st_info) == STB_GNU_UNIQUE)
 	{
-		type = 'u';
+		return('u');
 	}
 	else if (ELF64_ST_BIND(symbol->st_info) == STB_WEAK)
 	{
@@ -94,22 +90,27 @@ static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
 	{
 		type = get_type_from_header(file_content, symbol->st_shndx);
 	}
-	if (ELF64_ST_BIND(symbol->st_info) == STB_LOCAL && type != '?') 
+	if (ELF64_ST_BIND(symbol->st_info) == STB_LOCAL && type != 'N') 
 		type += 32;
 	return (type);
 }
 
 
-void	print_symbols(void const *file_content, t_list *symbols, Elf64_Shdr *shstrtab, uint32_t sh_offset)
+void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset)
 {
 	Elf64_Sym	*ptr;
 	uint8_t		class_padding = 8 * get_header(NULL)->e_ident[EI_CLASS];
 
-	(void)shstrtab;
 	for ( ; symbols != NULL; symbols = symbols->next)
 	{
 		ptr = symbols->content;
-		if (ptr->st_value != 0)
+		if (ptr->st_value != 0
+			|| ((ELF64_ST_BIND(ptr->st_info) == STB_GLOBAL
+				||  ELF64_ST_BIND(ptr->st_info) == STB_LOCAL)
+				&& ptr->st_shndx != SHN_UNDEF
+				&& ptr->st_shndx != SHN_ABS
+				&& ptr->st_shndx != SHN_COMMON
+				))
 			printf("%0*lx", class_padding, ptr->st_value);
 		else
 			printf("%*c", class_padding, ' ');
@@ -130,7 +131,7 @@ void	delete_list(t_list *ptr)
 	}
 }
 
-int		get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *strtab, Elf64_Shdr *symtab)
+int		get_symbols(void const *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symtab)
 {
 	Elf64_Sym	symbol;
 	t_list		*lst = NULL;
@@ -142,14 +143,15 @@ int		get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *str
 	{
 		if (fill_symbol(file_content + offset, &symbol, get_header(NULL)->e_ident[EI_CLASS]))
 			return (1);
-		if (symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE && ft_strlen(str + symbol.st_name) != 0)
+		if ((symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE && ft_strlen(str + symbol.st_name) != 0)
+			|| (symbol.st_info == STT_NOTYPE && symbol.st_shndx != 0))
 		{
 			ft_lstappend(&lst, &symbol, sizeof(symbol));
 		}
 		offset += symtab->sh_entsize;
 	}
 	sort_list(&lst, str);
-	print_symbols(file_content, lst, shstrtab, strtab->sh_offset);
+	print_symbols(file_content, lst, strtab->sh_offset);
 	delete_list(lst);
 	lst = NULL;
 	return (0);

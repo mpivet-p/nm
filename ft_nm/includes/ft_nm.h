@@ -15,7 +15,7 @@ int			check_file_format(void const *file_content);
 int			fill_header(void const *file_content, Elf64_Ehdr *header);
 int			get_section_headers(void const *file_content, Elf64_Ehdr *header);
 int			protected_memmove(void *dst, const void* src, size_t len, void *max_addr);
-int			get_symbols(void const *file_content, Elf64_Shdr *shstrtab, Elf64_Shdr *strtab
+int			get_symbols(void const *file_content, Elf64_Shdr *strtab
 											, Elf64_Shdr *symtab);
 int			sort_list(t_list **head, void const *str);
 Elf64_Ehdr	*get_header(Elf64_Ehdr *hdr);
