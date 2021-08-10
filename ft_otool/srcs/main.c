@@ -33,7 +33,7 @@ void			handle_open_error(const char *s)
 **	=================================== --------- ===================================
 */
 
-static int		get_file(const char *filepath)
+static int		get_file(const char *filepath, int option)
 {
 	int			file_size;
 	void		*file_content;
@@ -63,24 +63,27 @@ static int		get_file(const char *filepath)
 		munmap(file_content, file_size);
 		return (1);
 	}
-	get_section_headers(file_content, &header, filepath);
+	if (option == OTOOL_OPT_HEDR)
+		 (header.e_ident[EI_CLASS] == ELFCLASS64) ? dump_header_64(file_content, &header) : dump_header_32(file_content, &header);
+	else
+		get_section_headers(file_content, &header, filepath);
 	munmap(file_content, file_size);
 	return (0);
 }
 
 int				parse_args(int argc, char **argv, char *section)
 {
-	static char	*options[] = {"-t", "-h", "-hcolor", "-s", "-l"};
+	static char	*options[5] = {"-t", "-h", "-c", "-s", "-l"};
 
 	if (argc == 1)
 		return (-1);
-	for (size_t i = 0; i < (size_t)argc; i++)
+	for (size_t i = 0; i < 5; i++)
 	{
 		if (ft_strcmp(argv[1], options[i]) == 0)
 		{
-			if (i == OTOOL_OPT_S && argc >= 2)
+			if (i == OTOOL_OPT_SECT && argc > 3)
 				ft_strncpy(section, argv[2], 32);
-			else if (i == OTOOL_OPT_S)
+			else if (i == OTOOL_OPT_SECT || argc == 2)
 				return (-1);
 			return (i);
 		}
@@ -90,21 +93,26 @@ int				parse_args(int argc, char **argv, char *section)
 
 int				main(int argc, char **argv)
 {
+	size_t	i;
 	char	section[32];
+	int		options;
 	int		ret = 0;
 
-	printf("%d\n", parse_args(argc, argv, section));
-	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
+	if ((options = parse_args(argc, argv, section)) != -1)
 	{
-		if (get_file(argv[i]) != 0)
-			ret = 1;
+		i = 2 + (options == OTOOL_OPT_SECT);
+		for (; i < (size_t)argc; i++)	// Iterating over the args
+		{
+			if (get_file(argv[i], options) != 0)
+				ret = 1;
+		}
 	}
-	if (argc == 1)		// If we dont have args, we print usage
+	else
 	{
-		fprintf(stderr, "Usage: otool <object file> ...\n");
+		fprintf(stderr, "Usage: otool [-thcsl] <object file> ...\n");
 		fprintf(stderr, "\t-t print the text section\n");
 		fprintf(stderr, "\t-h print the header\n");
-		fprintf(stderr, "\t-hcolor print the header with colors\n");
+		fprintf(stderr, "\t-c print the header with colors\n");
 		fprintf(stderr, "\t-s <section name> print a section by it's name\n");
 		fprintf(stderr, "\t-l print the list of sections\n");
 		ret = 1;
