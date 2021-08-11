@@ -76,11 +76,11 @@ static int		get_file(const char *filepath, const char *st_name, int option)
 
 int				parse_args(int argc, char **argv, char **st_name)
 {
-	static char	*options[5] = {"-t", "-h", "-s", "-l"};
+	static char	*options[4] = {"-t", "-h", "-s", "-l"};
 
 	if (argc == 1)
 		return (-1);
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < 4; i++)
 	{
 		if (ft_strcmp(argv[1], options[i]) == 0)
 		{

@@ -54,9 +54,9 @@ static int		get_file(const char *filepath, void **file_content, int *file_size)
 static int		do_nm(const char *filepath, void *file_content, int file_size, int argc)
 {
 	Elf64_Ehdr	header;
-	int			ret;
+	int			ret = 0;
 
-	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
+	protect_offset(0, file_content, file_content + file_size); //	Initializing protected memmove with max_addr
 	if (fill_header(file_content, &header) != 0)
 	{
 		fprintf(stderr, "ft_nm: %s: File format not recognized\n", filepath);
@@ -77,8 +77,8 @@ static int		do_nm(const char *filepath, void *file_content, int file_size, int a
 
 int				main(int argc, char **argv)
 {
-	void	*file_content;
-	int		file_size;
+	void	*file_content = NULL;
+	int		file_size = 0;
 	int		ret = 0;
 
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args

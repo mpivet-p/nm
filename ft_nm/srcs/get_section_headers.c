@@ -48,13 +48,12 @@ int			get_section_headers(void const *file_content, Elf64_Ehdr *header)
 		{
 			return (1);
 		}
-	//	printf("[%.2d] ", i);
 	//	printf("%-20s", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name);
 	//	printf(" %12d", section_hdr.sh_type);
 	//	printf(" %12d", section_hdr.sh_info);
 	//	printf(" %12ld\n", section_hdr.sh_flags);
-	//	if (section_hdr.sh_flags == (SHF_MERGE | SHF_STRINGS))
-	//		printf("DEBUG\n");
+		//if (section_hdr.sh_type == SHT_STRTAB)
+		//	printf("DEBUG\n");
 		if (section_hdr.sh_type == SHT_SYMTAB)
 		{
 			symtab = section_hdr;
