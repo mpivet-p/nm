@@ -11,6 +11,10 @@
 # define OTOOL_OPT_SECT 3
 # define OTOOL_OPT_LIST 4
 
+# define COL_NONE		"\e[0m"
+# define COL_RED		"\e[31;1m"
+# define COL_BLUE		"\e[34;1m"
+
 int		check_file(int fd, const char *filepath);
 int		check_file_format(void *file_content);
 int		fill_header(void *file_content, Elf64_Ehdr *header);
