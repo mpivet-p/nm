@@ -27,12 +27,14 @@ static int	fill_section_header(void *file_content, size_t offset, Elf64_Shdr *se
 	return (0);
 }
 
-int			get_section_headers(void *file_content, Elf64_Ehdr *header, const char *filename)
+int			get_section_headers(void *file_content, Elf64_Ehdr *header
+				, const char *filename, const char *section_name, int option)
 {
-	size_t	offset = header->e_shoff;
-	size_t	shift = header->e_shentsize;
-	Elf64_Shdr section_hdr;
-	Elf64_Shdr shstrtab;
+	Elf64_Shdr	section_hdr;
+	Elf64_Shdr	shstrtab;
+	size_t		offset = header->e_shoff;
+	size_t		shift = header->e_shentsize;
+	char		*st_name;
 
 	if (fill_section_header(file_content, offset + (shift * header->e_shstrndx), &shstrtab, header) != 0)
 	{
@@ -42,16 +44,20 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header, const char *fi
 	for (int i = 0; i < header->e_shnum; i++)
 	{
 		if (fill_section_header(file_content, offset + (shift * i), &section_hdr, header) != 0)
-		{
 			return (1);
-		}
-		//printf("%-20s {%d}", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, section_hdr.sh_type);
-		if (section_hdr.sh_type == SHT_PROGBITS
-			&& ft_strcmp(".text", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name) == 0)
+		st_name = (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name;
+		if ((option == OTOOL_OPT_TEXT
+				&& section_hdr.sh_type == SHT_PROGBITS
+				&& ft_strcmp(".text", st_name) == 0)
+			|| (section_name != NULL && ft_strcmp(section_name, st_name) == 0))
 		{
-			printf("Contents of (.text) section\n");
+			printf("Contents of (%s) section\n", st_name);
 			dump_section(file_content, &section_hdr, header->e_ident[EI_CLASS]);
 			break ;
+		}
+		else if (option == OTOOL_OPT_LIST)
+		{
+			printf("%0*lx %-21s   (%ld bytes)\n", 8 * header->e_ident[EI_CLASS], section_hdr.sh_offset, st_name, section_hdr.sh_size);
 		}
 	}
 	return (0);

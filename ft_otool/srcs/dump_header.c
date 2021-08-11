@@ -18,7 +18,7 @@ static void	print_bytes(void const *file_content, size_t start, size_t size, con
 	printf("\e[0m");
 }
 
-void	dump_header_32(void const *file_content, Elf64_Ehdr *header)
+static void	dump_header_32(void const *file_content, Elf64_Ehdr *header)
 {
 	printf("%08x\t", 0);
 	print_bytes(file_content, 0, 4, "\e[31;1m");
@@ -32,8 +32,8 @@ void	dump_header_32(void const *file_content, Elf64_Ehdr *header)
 	print_bytes(file_content, 28, 4, COL_NONE);
 	printf("%08x\t", 2);
 	print_bytes(file_content, 32, 4, "\e[31;1m");
-	print_bytes(file_content, 36, 4, COL_NONE);
-	print_bytes(file_content, 40, 2, "\e[34;1m");
+	print_bytes(file_content, 36, 4, "\e[34;1m");
+	print_bytes(file_content, 40, 2, COL_NONE);
 	print_bytes(file_content, 42, 2, "\e[31;1m");
 	print_bytes(file_content, 44, 2, COL_NONE);
 	print_bytes(file_content, 46, 2, "\e[34;1m");
@@ -52,8 +52,8 @@ void	dump_header_32(void const *file_content, Elf64_Ehdr *header)
 	printf("\e[34;1m(4 bytes) e_entry:\e[0m\t\t%d\n", (uint32_t)header->e_entry);
 	printf("(4 bytes) e_phoff:\e[0m\t\t%d\n", (uint32_t)header->e_phoff);
 	printf("\e[31;1m(4 bytes) e_shoff:\e[0m\t\t%d\n", (uint32_t)header->e_shoff);
-	printf("(4 bytes) e_flags:\e[0m\t\t%d\n", header->e_flags);
-	printf("\e[34;1m(2 bytes) e_ehsize:\e[0m\t\t%d\n", header->e_ehsize);
+	printf("\e[34;1m(4 bytes) e_flags:\e[0m\t\t%d\n", header->e_flags);
+	printf("(2 bytes) e_ehsize:\e[0m\t\t%d\n", header->e_ehsize);
 	printf("\e[31;1m(2 bytes) e_phentsize:\e[0m\t\t%d\n", header->e_phentsize);
 	printf("(2 bytes) e_phnum:\e[0mt\t\t%d\n", header->e_phnum);
 	printf("\e[34;1m(2 bytes) e_shentsize:\e[0m\t\t%d\n", header->e_shentsize);
@@ -61,7 +61,7 @@ void	dump_header_32(void const *file_content, Elf64_Ehdr *header)
 	printf("(2 bytes) e_shstrndx:\e[0m\t\t%d\n", header->e_shstrndx);
 }
 
-void	dump_header_64(void const *file_content, Elf64_Ehdr *header)
+static void	dump_header_64(void const *file_content, Elf64_Ehdr *header)
 {
 	printf("%016x\t", 0);
 	print_bytes(file_content, 0, 4, "\e[31;1m");
@@ -76,8 +76,8 @@ void	dump_header_64(void const *file_content, Elf64_Ehdr *header)
 	print_bytes(file_content, 32, 8, COL_NONE);
 	print_bytes(file_content, 40, 8, "\e[31;1m");
 	printf("%016x\t", 3);
-	print_bytes(file_content, 48, 4, COL_NONE);
-	print_bytes(file_content, 52, 2, "\e[34;1m");
+	print_bytes(file_content, 48, 4, "\e[34;1m");
+	print_bytes(file_content, 52, 2, COL_NONE);
 	print_bytes(file_content, 54, 2, "\e[31;1m");
 	print_bytes(file_content, 56, 2, COL_NONE);
 	print_bytes(file_content, 58, 2, "\e[34;1m");
@@ -95,11 +95,21 @@ void	dump_header_64(void const *file_content, Elf64_Ehdr *header)
 	printf("\e[34;1m(8 bytes) e_entry:\e[0m\t\t%ld\n", header->e_entry);
 	printf("(8 bytes) e_phoff:\e[0m\t\t%ld\n", header->e_phoff);
 	printf("\e[31;1m(8 bytes) e_shoff:\e[0m\t\t%ld\n", header->e_shoff);
-	printf("(4 bytes) e_flags:\e[0m\t\t%d\n", header->e_flags);
-	printf("\e[34;1m(2 bytes) e_ehsize:\e[0m\t\t%d\n", header->e_ehsize);
+	printf("\e[34;1m(4 bytes) e_flags:\e[0m\t\t%d\n", header->e_flags);
+	printf("(2 bytes) e_ehsize:\e[0m\t\t%d\n", header->e_ehsize);
 	printf("\e[31;1m(2 bytes) e_phentsize:\e[0m\t\t%d\n", header->e_phentsize);
 	printf("(2 bytes) e_phnum:\e[0mt\t\t%d\n", header->e_phnum);
 	printf("\e[34;1m(2 bytes) e_shentsize:\e[0m\t\t%d\n", header->e_shentsize);
 	printf("\e[31;1m(2 bytes) e_shnum:\e[0m\t\t%d\n", header->e_shnum);
 	printf("(2 bytes) e_shstrndx:\e[0m\t\t%d\n", header->e_shstrndx);
+}
+
+void	dump_header(void const *file_content, Elf64_Ehdr *header, const char *filepath)
+{
+	printf("%s:\nContent of Elf header\n", filepath);
+
+	if (header->e_ident[EI_CLASS] == ELFCLASS64)
+		dump_header_64(file_content, header);
+	else
+		dump_header_32(file_content, header);
 }
