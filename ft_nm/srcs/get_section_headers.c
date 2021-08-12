@@ -10,9 +10,9 @@ int	fill_section_header(void const *file_content, size_t offset, Elf64_Shdr *s_h
 
 	if (header->e_ident[EI_CLASS] == ELFCLASS64)
 	{
-		return (protected_memmove(s_hdr, file_content + offset, sizeof(Elf64_Shdr), 0));
+		return (protected_memmove(s_hdr, file_content + offset, sizeof(Elf64_Shdr)));
 	}
-	if (protected_memmove(&tmp_hdr, file_content + offset, sizeof(Elf32_Shdr), 0) != 0)
+	if (protected_memmove(&tmp_hdr, file_content + offset, sizeof(Elf32_Shdr)) != 0)
 		return (1);
 	s_hdr->sh_name = tmp_hdr.sh_name;
 	s_hdr->sh_type = tmp_hdr.sh_type;
@@ -59,7 +59,7 @@ int			get_section_headers(void const *file_content, Elf64_Ehdr *header)
 			symtab = section_hdr;
 		}
 		if (section_hdr.sh_type == SHT_STRTAB
-			&& ft_strcmp((char*)file_content + shstrtab.sh_offset + section_hdr.sh_name, ".strtab") == 0)
+			&& protected_strcmp(".strtab", (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name) == 0)
 		{
 			strtab = section_hdr;
 		}

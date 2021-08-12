@@ -8,8 +8,8 @@ static int	fill_symbol(void const *file_content, Elf64_Sym *symbol, int class)
 	Elf32_Sym tmp_symbol;
 
 	if (class == ELFCLASS64)
-		return (protected_memmove(symbol, file_content, sizeof(Elf64_Sym), 0));
-	if (protected_memmove(&tmp_symbol, file_content, sizeof(Elf32_Sym), 0) != 0)
+		return (protected_memmove(symbol, file_content, sizeof(Elf64_Sym)));
+	if (protected_memmove(&tmp_symbol, file_content, sizeof(Elf32_Sym)) != 0)
 	{
 		return (1);
 	}
@@ -28,7 +28,8 @@ static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 	Elf64_Shdr	shdr;
 	char		type = 0;
 
-	fill_section_header(file_content, header->e_shoff + (header->e_shentsize * sh_shndx), &shdr, header);
+	if (fill_section_header(file_content, header->e_shoff + (header->e_shentsize * sh_shndx), &shdr, header) != 0)
+		return ('0');
 	if (shdr.sh_type == SHT_NOBITS && shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)) //.bss
 		type = 'B';
 	else if (shdr.sh_type == SHT_PROGBITS)
@@ -115,7 +116,10 @@ void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset
 		else
 			printf("%*c", class_padding, ' ');
 		printf(" %c", get_symbol_type(file_content, ptr));
-		printf(" %s\n", (char*)(file_content + sh_offset + ptr->st_name));
+		if (protect_offset(file_content + sh_offset + ptr->st_name, NULL, NULL) == 0)
+			printf(" %s\n", (char*)(file_content + sh_offset + ptr->st_name));
+		else
+			break ;
 	}
 }
 
@@ -126,6 +130,7 @@ void	delete_list(t_list *ptr)
 	{
 		next = ptr->next;
 		free(ptr->content);
+		ptr->content = NULL;
 		free(ptr);
 		ptr = next;
 	}
@@ -143,7 +148,8 @@ int		get_symbols(void const *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symta
 	{
 		if (fill_symbol(file_content + offset, &symbol, get_header(NULL)->e_ident[EI_CLASS]))
 			return (1);
-		if ((symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE && ft_strlen(str + symbol.st_name) != 0)
+		if ((symbol.st_info != STT_SECTION && symbol.st_info != STT_FILE
+				&& protect_offset(str + symbol.st_name, 0, 0) == 0 && ft_strlen(str + symbol.st_name) != 0)
 			|| (symbol.st_info == STT_NOTYPE && symbol.st_shndx != 0))
 		{
 			ft_lstappend(&lst, &symbol, sizeof(symbol));

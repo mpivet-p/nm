@@ -18,23 +18,17 @@ int		protect_offset(void const *ptr, void const *min, void const *max)
 	return (0);
 }
 
-int		ft_strcmp(const char *s1, const char *s2)
+int		protected_strcmp(const char *s1, const char *s2)
 {
 	if (protect_offset(s2 + ft_strlen(s1), NULL, NULL) != 0)
 		return (-420);
 	return (ft_strcmp(s1, s2));
 }
 
-int		protected_memmove(void *dst, const void* src, size_t len, void *max_addr)
+int		protected_memmove(void *dst, const void* src, size_t len)
 {
-	static void	*addr;
 
-	if (max_addr != NULL)
-	{
-		addr = max_addr;
-		return (-1);
-	}
-	if (src + len > addr)
+	if (protect_offset(src + len, NULL, NULL) != 0)
 	{
 		return (1);
 	}
