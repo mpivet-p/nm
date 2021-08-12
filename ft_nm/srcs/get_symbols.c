@@ -22,6 +22,32 @@ static int	fill_symbol(void const *file_content, Elf64_Sym *symbol, int class)
 	return (0);
 }
 
+void	debug_symbols(void const *file_content, Elf64_Sym *symbol)
+{	
+	Elf64_Ehdr	*header = get_header(NULL);
+	Elf64_Shdr	shdr;
+
+	if (fill_section_header(file_content
+		, header->e_shoff + (header->e_shentsize * symbol->st_shndx), &shdr, header) != 0)
+	{
+		return ;
+	}
+	printf("SHT_ = [%d %x]", shdr.sh_type, shdr.sh_type);
+	printf(" SHF_ = 0(%d) 1(%d) 2(%d) 4(%d) 5(%d) 6(%d) 7(%d) 8(%d) 9(%d) 10(%d) 11(%d)"
+	, (shdr.sh_flags & SHF_WRITE) ? 1 : 0
+	, (shdr.sh_flags & SHF_ALLOC) ? 1 : 0
+	, (shdr.sh_flags & SHF_EXECINSTR) ? 1 : 0
+	, (shdr.sh_flags & SHF_MERGE) ? 1 : 0
+	, (shdr.sh_flags & SHF_STRINGS) ? 1 : 0
+	, (shdr.sh_flags & SHF_INFO_LINK) ? 1 : 0
+	, (shdr.sh_flags & SHF_LINK_ORDER) ? 1 : 0
+	, (shdr.sh_flags & SHF_OS_NONCONFORMING) ? 1 : 0
+	, (shdr.sh_flags & SHF_GROUP) ? 1 : 0
+	, (shdr.sh_flags & SHF_TLS) ? 1 : 0
+	, (shdr.sh_flags & SHF_COMPRESSED) ? 1 : 0
+	);
+	printf(" STB_ = [%d] [%d] {%d}\n", ELF64_ST_BIND(symbol->st_info), ELF64_ST_TYPE(symbol->st_info), symbol->st_shndx);
+}
 static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 {
 	Elf64_Ehdr	*header = get_header(NULL);
@@ -91,8 +117,10 @@ static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
 	{
 		type = get_type_from_header(file_content, symbol->st_shndx);
 	}
-	if (ELF64_ST_BIND(symbol->st_info) == STB_LOCAL && type != 'N') 
+	if (ELF64_ST_BIND(symbol->st_info) == STB_LOCAL) 
 		type += 32;
+	if (ELF64_ST_TYPE(symbol->st_info) == STT_LOOS)
+		type = 'i';
 	return (type);
 }
 
@@ -109,7 +137,6 @@ void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset
 			|| ((ELF64_ST_BIND(ptr->st_info) == STB_GLOBAL
 				||  ELF64_ST_BIND(ptr->st_info) == STB_LOCAL)
 				&& ptr->st_shndx != SHN_UNDEF
-				&& ptr->st_shndx != SHN_ABS
 				&& ptr->st_shndx != SHN_COMMON
 				))
 			printf("%0*lx", class_padding, ptr->st_value);
@@ -120,6 +147,7 @@ void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset
 			printf(" %s\n", (char*)(file_content + sh_offset + ptr->st_name));
 		else
 			break ;
+//		debug_symbols(file_content, ptr);
 	}
 }
 
