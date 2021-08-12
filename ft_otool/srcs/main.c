@@ -56,7 +56,7 @@ static int		get_file(const char *filepath, const char *st_name, int option)
 		return (-1);
 	}
 	close(fd);
-	protected_memmove(0, 0, 0, file_content + file_size); //	Initializing protected memmove with max_addr
+	protect_offset(0, file_content, file_content + file_size); //	Initializing offset protection
 	if (fill_header(file_content, &header) != 0)
 	{
 		fprintf(stderr, "ft_otool: %s: is not an object file\n", filepath);

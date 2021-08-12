@@ -10,9 +10,9 @@ static int	fill_section_header(void *file_content, size_t offset, Elf64_Shdr *se
 
 	if (header->e_ident[EI_CLASS] == ELFCLASS64)
 	{
-		return (protected_memmove(section_hdr, file_content + offset, sizeof(Elf64_Shdr), 0));
+		return (protected_memmove(section_hdr, file_content + offset, sizeof(Elf64_Shdr)));
 	}
-	if (protected_memmove(&tmp_hdr, file_content + offset, sizeof(Elf32_Shdr), 0) != 0)
+	if (protected_memmove(&tmp_hdr, file_content + offset, sizeof(Elf32_Shdr)) != 0)
 		return (1);
 	section_hdr->sh_name = tmp_hdr.sh_name;
 	section_hdr->sh_type = tmp_hdr.sh_type;
@@ -48,8 +48,8 @@ int			get_section_headers(void *file_content, Elf64_Ehdr *header
 		st_name = (char*)file_content + shstrtab.sh_offset + section_hdr.sh_name;
 		if ((option == OTOOL_OPT_TEXT
 				&& section_hdr.sh_type == SHT_PROGBITS
-				&& ft_strcmp(".text", st_name) == 0)
-			|| (section_name != NULL && ft_strcmp(section_name, st_name) == 0))
+				&& protected_strcmp(".text", st_name) == 0)
+			|| (section_name != NULL && protected_strcmp(section_name, st_name) == 0))
 		{
 			printf("Contents of (%s) section\n", st_name);
 			dump_section(file_content, &section_hdr, header->e_ident[EI_CLASS]);

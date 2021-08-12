@@ -20,7 +20,7 @@ OBJ_PATH= objs/
 
 INC_NAME= ft_otool.h
 SRC_NAME= main.c check_file.c fill_header.c get_section_headers.c\
-			protected_memmove.c dump_section.c dump_header.c
+			protect.c dump_section.c dump_header.c
 OBJ_NAME= $(SRC_NAME:.c=.o)
 
 INC= -I $(INC_PATH) -I libft/inc/

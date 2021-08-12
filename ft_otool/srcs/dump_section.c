@@ -1,8 +1,11 @@
+#include "ft_otool.h"
 #include <elf.h>
 #include <stdio.h>
 
 void	dump_section(void const *file_content, Elf64_Shdr *shdr, uint8_t ei_class)
 {
+	if (protect_offset(file_content + shdr->sh_offset + shdr->sh_size, NULL, NULL) != 0)
+		return ;
 	for (size_t i = 0; i < shdr->sh_size; i++)
 	{
 		if (i % 16 == 0)

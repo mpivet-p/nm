@@ -19,8 +19,10 @@ int		check_file_format(void *file_content);
 int		fill_header(void *file_content, Elf64_Ehdr *header);
 int		get_section_headers(void *file_content, Elf64_Ehdr *header
 			, const char *filename, const char *section_name, int option);
-int		protected_memmove(void *dst, const void* src, size_t len, void *max_addr);
 void	dump_section(void const *file_content, Elf64_Shdr *shdr, uint8_t ei_class);
+int			protect_offset(void const *ptr, void const *min, void const *max);
+int			protected_strcmp(const char *s1, const char *s2);
+int			protected_memmove(void *dst, const void* src, size_t len);
 
 /*
 **	============================={ BONUS }===================================
