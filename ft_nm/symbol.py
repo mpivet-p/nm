@@ -4,7 +4,9 @@ ft_nm = file1.readlines()
 file2 = open('nm.out', 'r')
 nm = file2.readlines()
  
+the_file = open('diff', 'w')
+
 for i in range(len(ft_nm)):
 	if ft_nm[i] != nm[i]:
-		print(ft_nm[i].strip())
-		print(nm[i].strip())
+		the_file.write(ft_nm[i])
+		the_file.write(nm[i])

@@ -12,9 +12,9 @@ static int		is_sorted(t_list *a, t_list *b, void const *str)
 	s2 = (char*)(str + ((Elf64_Sym*)b->content)->st_name);
 	while (s1[i] && s2[j])
 	{
-		while (s1[i] && (s1[i] == '_' || s1[i] == '.'))
+		while (s1[i] && (s1[i] == '_' || s1[i] == '.' || s1[i] == '@'))
 			i++;
-		while (s2[j] && (s2[j] == '_' || s2[j] == '.'))
+		while (s2[j] && (s2[j] == '_' || s2[j] == '.' || s2[j] == '@'))
 			j++;
 		if (!s1[i] || ft_tolower(s1[i]) != ft_tolower(s2[j]))
 			break ;
