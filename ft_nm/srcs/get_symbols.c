@@ -77,12 +77,12 @@ static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 	}
 	else if (shdr.sh_flags == (SHF_ALLOC | SHF_WRITE)
 		&& (shdr.sh_type == SHT_INIT_ARRAY || shdr.sh_type == SHT_FINI_ARRAY)) //.init_array or .fini_array
-		type = 'T';
+		type = 'D';
 	else if (shdr.sh_flags == (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)) //.fini_array
 		type = 'T';
 	else if (shdr.sh_type == SHT_DYNAMIC) //.dynamic
 		type = 'D';
-	return (type ? type : 'N');
+	return (type ? type : 'B');
 }
 
 static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
@@ -99,7 +99,9 @@ static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
 		if (symbol->st_shndx == SHN_UNDEF)
 			type = 'w';
 		if (ELF64_ST_TYPE(symbol->st_info) == STT_OBJECT)
-			type = 'V';
+		{
+			type = 'v';
+		}
 	}
 	else if (symbol->st_shndx == SHN_UNDEF)
 	{
