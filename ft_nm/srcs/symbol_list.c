@@ -24,8 +24,7 @@ static int		is_sorted(t_list *a, t_list *b, void const *str)
 	ret = ft_tolower(s1[i]) - ft_tolower(s2[j]);
 	if (ret == 0)
 	{
-		return (ELF64_ST_BIND(((Elf64_Sym*)a->content)->st_info)
-			- ELF64_ST_BIND(((Elf64_Sym*)b->content)->st_info));
+		return (ft_strlen(s2) - ft_strlen(s1));
 	}
 	return (ret);
 }

@@ -10,6 +10,12 @@
 # define FTNM_SIZE	1
 # define FTNM_CLASS	2
 
+typedef struct	symbol_sort
+{
+	Elf64_Sym	*symbol;
+	char		*symbol_short_name;
+}				t_sym_sort;
+
 int			check_file(int fd, const char *filepath);
 int			check_file_format(void const *file_content);
 int			fill_header(void const *file_content, Elf64_Ehdr *header);
