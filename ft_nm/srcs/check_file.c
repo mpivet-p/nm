@@ -7,8 +7,7 @@
 
 static void	handle_file_type(struct stat *sb, const char *s)
 {
-	ft_putstr_fd("ft_nm: ", STDERR_FILENO);
-	ft_putstr_fd("Warning: '", STDERR_FILENO);
+	ft_putstr_fd("ft_nm: Warning: '", STDERR_FILENO);
 	if (S_ISDIR(sb->st_mode) == 1)
 	{
 		ft_putstr_fd(s, STDERR_FILENO);

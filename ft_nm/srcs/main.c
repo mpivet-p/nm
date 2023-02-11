@@ -48,7 +48,7 @@ static int		get_file(const char *filepath, void **file_content, int *file_size)
 		*file_content = mmap(NULL, *file_size, PROT_READ, MAP_PRIVATE, fd, 0);
 	}
 	close(fd);
-	return (*file_content == MAP_FAILED);
+	return (*file_content == NULL || *file_content == MAP_FAILED);
 }
 
 static int		do_nm(const char *filepath, void *file_content, int file_size, int argc)
@@ -83,6 +83,7 @@ int				main(int argc, char **argv)
 
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
 	{
+		file_content = NULL;
 		if (get_file(argv[i], &file_content, &file_size) != 0
 			|| do_nm(argv[i], file_content, file_size, argc) != 0)
 			ret = 1;
