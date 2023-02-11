@@ -19,8 +19,9 @@ SRC_PATH= srcs/
 OBJ_PATH= objs/
 
 INC_NAME= ft_nm.h
-SRC_NAME= main.c check_file.c fill_header.c get_section_headers.c get_header.c\
-			protect.c get_symbols.c symbol_list.c
+SRC_NAME= main.c fill_header.c get_section_headers.c get_header.c\
+			protect.c get_symbols.c symbol_list.c get_file.c\
+			fill_section_header.c nm.c
 OBJ_NAME= $(SRC_NAME:.c=.o)
 
 INC= -I $(INC_PATH) -I libft/inc/

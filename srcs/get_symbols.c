@@ -22,32 +22,6 @@ static int	fill_symbol(void const *file_content, Elf64_Sym *symbol, int class)
 	return (0);
 }
 
-void	debug_symbols(void const *file_content, Elf64_Sym *symbol)
-{	
-	Elf64_Ehdr	*header = get_header(NULL);
-	Elf64_Shdr	shdr;
-
-	if (fill_section_header(file_content
-		, header->e_shoff + (header->e_shentsize * symbol->st_shndx), &shdr, header) != 0)
-	{
-		return ;
-	}
-	printf("SHT_ = [%d %x]", shdr.sh_type, shdr.sh_type);
-	printf(" SHF_ = 0(%d) 1(%d) 2(%d) 4(%d) 5(%d) 6(%d) 7(%d) 8(%d) 9(%d) 10(%d) 11(%d)"
-	, (shdr.sh_flags & SHF_WRITE) ? 1 : 0
-	, (shdr.sh_flags & SHF_ALLOC) ? 1 : 0
-	, (shdr.sh_flags & SHF_EXECINSTR) ? 1 : 0
-	, (shdr.sh_flags & SHF_MERGE) ? 1 : 0
-	, (shdr.sh_flags & SHF_STRINGS) ? 1 : 0
-	, (shdr.sh_flags & SHF_INFO_LINK) ? 1 : 0
-	, (shdr.sh_flags & SHF_LINK_ORDER) ? 1 : 0
-	, (shdr.sh_flags & SHF_OS_NONCONFORMING) ? 1 : 0
-	, (shdr.sh_flags & SHF_GROUP) ? 1 : 0
-	, (shdr.sh_flags & SHF_TLS) ? 1 : 0
-	, (shdr.sh_flags & SHF_COMPRESSED) ? 1 : 0
-	);
-	printf(" STB_ = [%d] [%d] {%d}\n", ELF64_ST_BIND(symbol->st_info), ELF64_ST_TYPE(symbol->st_info), symbol->st_shndx);
-}
 static char	get_type_from_header(void const *file_content, uint32_t sh_shndx)
 {
 	Elf64_Ehdr	*header = get_header(NULL);
@@ -127,7 +101,7 @@ static char	get_symbol_type(void const *file_content, Elf64_Sym *symbol)
 }
 
 
-void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset)
+static void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset)
 {
 	Elf64_Sym	*ptr;
 	uint8_t		class_padding = 8 * get_header(NULL)->e_ident[EI_CLASS];
@@ -149,11 +123,10 @@ void	print_symbols(void const *file_content, t_list *symbols, uint32_t sh_offset
 			printf(" %s\n", (char*)(file_content + sh_offset + ptr->st_name));
 		else
 			break ;
-//		debug_symbols(file_content, ptr);
 	}
 }
 
-void	delete_list(t_list *ptr)
+static void	delete_list(t_list *ptr)
 {
 	t_list *next;
 	while (ptr)

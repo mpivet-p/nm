@@ -1,4 +1,4 @@
-#include "libft.h"
+#include "ft_nm.h"
 
 int		protect_offset(void const *ptr, void const *min, void const *max)
 {

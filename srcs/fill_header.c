@@ -1,5 +1,4 @@
-#include "libft.h"
-#include <elf.h>
+#include "ft_nm.h"
 #include <stdio.h>
 
 static void	get_32_bits_header(Elf64_Ehdr *header, void const *file_content)
