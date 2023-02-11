@@ -22,7 +22,7 @@ int			fill_header(void const *file_content, Elf64_Ehdr *header);
 int			get_section_headers(void const *file_content, Elf64_Ehdr *header);
 int			get_symbols(void const *file_content, Elf64_Shdr *strtab
 											, Elf64_Shdr *symtab);
-int			sort_list(t_list **head, void const *str);
+t_list		*merge_sort(t_list *head, void const *str);
 Elf64_Ehdr	*get_header(Elf64_Ehdr *hdr);
 int			fill_section_header(void const *file_content, size_t offset, Elf64_Shdr *s_hdr, Elf64_Ehdr *header);
 int			protect_offset(void const *ptr, void const *min, void const *max);

@@ -186,7 +186,7 @@ int		get_symbols(void const *file_content, Elf64_Shdr *strtab, Elf64_Shdr *symta
 		}
 		offset += symtab->sh_entsize;
 	}
-	sort_list(&lst, str);
+	lst = merge_sort(lst, str);
 	print_symbols(file_content, lst, strtab->sh_offset);
 	delete_list(lst);
 	lst = NULL;

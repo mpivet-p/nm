@@ -29,37 +29,57 @@ static int		is_sorted(t_list *a, t_list *b, void const *str)
 	return (ret);
 }
 
-static t_list *swap(t_list *ptr1, t_list *ptr2)
+static t_list	*merge(t_list *left, t_list *right, void const *str)
 {
-    t_list *tmp = ptr2->next;
-    ptr2->next = ptr1;
-    ptr1->next = tmp;
-    return ptr2;
+	t_list *result = NULL;
+
+	if (left == NULL)
+		return (right);
+	else if (right == NULL)
+		return (left);
+
+	if (is_sorted(right, left, str) >= 0)
+	{
+		result = left;
+		result->next = merge(left->next, right, str);
+	}
+	else
+	{
+		result = right;
+		result->next = merge(left, right->next, str);
+	}
+	return (result);
 }
 
-int sort_list(t_list **head, void const *str)
+t_list *merge_sort(t_list *head, void const *str)
 {
-    t_list	**h;
-	int		count = ft_lstlen(*head);
-    int		i, j, swapped;
+	t_list	*left = NULL;
+	t_list 	*right = NULL;
+	t_list 	*current = head;
+	t_list 	*tail = NULL;
+	t_list 	*middle = NULL;
+	size_t	count = 0;
 
-    for (i = 0; i <= count; i++)
-    {
-        h = head;
-        swapped = 0;
-        for (j = 0; j < count - i - 1; j++)
-        {
-            t_list *p1 = *h;
-            t_list *p2 = p1->next;
-            if (is_sorted(p1, p2, str) > 0)
-            {
-                *h = swap(p1, p2);
-                swapped = 1;
-            }
-            h = &(*h)->next;
-        }
-        if (swapped == 0)
-            break;
-    }
-	return (0);
+	if (head == NULL || head->next == NULL)
+		return (head);
+
+	while (current != NULL)
+	{
+		count++;
+		current = current->next;
+	}
+
+	current = head;
+	middle = head;
+	for (size_t i = 0; i < count / 2; i++)
+	{
+		tail = middle;
+		middle = middle->next;
+	}
+
+	tail->next = NULL;
+	left = merge_sort(head, str);
+	right = merge_sort(middle, str);
+
+	return (merge(left, right, str));
 }
