@@ -75,12 +75,28 @@ static int		do_nm(const char *filepath, void *file_content, int file_size, int a
 	return (ret);
 }
 
+static int	check_args(int argc, char **argv)
+{
+	for (int i = 1; i < argc; i++)
+	{
+		if (argv[i][0] == '-')
+		{
+			fprintf(stderr, "ft_nm: invalid option -- '%s'\nUsage: ft_nm [file(s)]\n "
+				"List symbols in [file(s)] (a.out by default).\n", argv[i]);
+			return (1);
+		}
+	}
+	return (0);
+}
+
 int				main(int argc, char **argv)
 {
 	void	*file_content = NULL;
 	int		file_size = 0;
 	int		ret = 0;
 
+	if (check_args(argc, argv))
+		return (1);
 	for (size_t i = 1; i < (size_t)argc; i++)	// Iterating over the args
 	{
 		file_content = NULL;
