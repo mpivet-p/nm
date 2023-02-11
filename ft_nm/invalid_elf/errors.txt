@@ -1,6 +1,0 @@
-Thoses header errors are supposed to generate errors on nm:
-EI_CLASS (File format...)
-EI_DATA (File format...)
-EI_VERSION (File format...)
-e_shoff = 0 (nm: out of memory allocating 3343360048768205661 bytes after a total of 0 bytes)
-all others are ignored
